@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using SwiftBets.BuildingBlocks.Testing;
 
 namespace SwiftBets.Offer.Api.Tests;
 
@@ -36,6 +37,14 @@ public sealed class HostTests : IClassFixture<HostTests.Factory>
     }
 
     [Fact]
+    public async Task Suspending_a_market_requires_an_operator_token()
+    {
+        using var response = await _client.PostAsync(new Uri("/fixtures/fx/markets/fx-1x2/suspend", UriKind.Relative), null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task Metrics_are_exposed()
     {
         var body = await _client.GetStringAsync(new Uri("/metrics", UriKind.Relative), TestContext.Current.CancellationToken);
@@ -49,6 +58,9 @@ public sealed class HostTests : IClassFixture<HostTests.Factory>
         {
         builder.UseSetting("Kafka:BootstrapServers", "127.0.0.1:1");
         builder.UseSetting("ConnectionStrings:Redis", "127.0.0.1:1,connectTimeout=200");
+            builder.UseSetting("Replay:Enabled", "false");
+            builder.UseSetting("Jwt:Authority", TestJwt.Issuer);
+            builder.ConfigureServices(services => services.UseTestJwt());
         }
     }
 }

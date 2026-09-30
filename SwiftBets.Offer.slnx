@@ -7,6 +7,9 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SwiftBets.Offer.Api.Tests/SwiftBets.Offer.Api.Tests.csproj" />
+    <Project Path="tests/SwiftBets.Offer.Application.Tests/SwiftBets.Offer.Application.Tests.csproj" />
     <Project Path="tests/SwiftBets.Offer.ArchitectureTests/SwiftBets.Offer.ArchitectureTests.csproj" />
+    <Project Path="tests/SwiftBets.Offer.Domain.Tests/SwiftBets.Offer.Domain.Tests.csproj" />
+    <Project Path="tests/SwiftBets.Offer.Infrastructure.Tests/SwiftBets.Offer.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>

@@ -1,0 +1,58 @@
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Time.Testing;
+using SwiftBets.Offer.Application.Ports;
+using SwiftBets.Offer.Application.Replay;
+using SwiftBets.Offer.Domain;
+
+namespace SwiftBets.Offer.Application.Tests;
+
+public sealed class ReplayEngineTests
+{
+    private static readonly DateTimeOffset Epoch = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+    [Fact]
+    public async Task Fixture_is_listed_then_resulted_exactly_once()
+    {
+        var (engine, offer, clock) = Build();
+
+        clock.SetUtcNow(Epoch.AddSeconds(5));
+        await engine.TickAsync(CancellationToken.None);
+        clock.SetUtcNow(Epoch.AddSeconds(25));
+        await engine.TickAsync(CancellationToken.None);
+        await engine.TickAsync(CancellationToken.None);
+
+        offer.Published.ShouldContain(f => f.OfferVersion == 1 && f.Status == Contracts.Offer.FixtureStatus.Scheduled);
+        offer.Results.Count.ShouldBe(1);
+        offer.Results[0].HomeGoals.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Unchanged_offer_is_not_republished()
+    {
+        var (engine, offer, clock) = Build();
+        clock.SetUtcNow(Epoch.AddSeconds(5));
+        await engine.TickAsync(CancellationToken.None);
+
+        (await engine.TickAsync(CancellationToken.None)).ShouldBe(0);
+        offer.Published.Count.ShouldBe(1);
+    }
+
+    private static (ReplayEngine Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build()
+    {
+        var offer = new InMemoryOffer();
+        var clock = new FakeTimeProvider(Epoch);
+        var options = Options.Create(new ReplayOptions { SlotSeconds = 10, ListLeadSlots = 1, Epoch = Epoch });
+        return (new ReplayEngine(new OneMatchSeason(), offer, offer, options, clock), offer, clock);
+    }
+
+    private sealed class OneMatchSeason : ISeasonSource
+    {
+        private static readonly HistoricalPrices Prices = new(2m, 3.4m, 4m, 1.9m, 1.9m);
+
+        public string Competition => "Premier League";
+
+        public string Season => "test";
+
+        public IReadOnlyList<HistoricalMatch> Matches { get; } = [new(0, "Arsenal", "Chelsea", 2, 1, Prices, Prices)];
+    }
+}

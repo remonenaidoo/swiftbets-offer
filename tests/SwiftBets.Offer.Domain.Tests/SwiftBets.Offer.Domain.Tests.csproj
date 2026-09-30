@@ -6,9 +6,8 @@
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    <PackageReference Include="SwiftBets.BuildingBlocks.Testing" />
-    <ProjectReference Include="../../src/SwiftBets.Offer.Api/SwiftBets.Offer.Api.csproj" />
+
+    <ProjectReference Include="../../src/SwiftBets.Offer.Domain/SwiftBets.Offer.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

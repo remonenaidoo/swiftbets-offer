@@ -5,7 +5,7 @@ namespace SwiftBets.Offer.ArchitectureTests;
 
 public sealed class LayerTests
 {
-    private static readonly Assembly Domain = typeof(SwiftBets.Offer.Domain.DomainAssembly).Assembly;
+    private static readonly Assembly Domain = typeof(SwiftBets.Offer.Domain.Odds).Assembly;
     private static readonly Assembly Application = typeof(SwiftBets.Offer.Application.ApplicationRegistration).Assembly;
 
     [Fact]
