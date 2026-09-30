@@ -29,11 +29,11 @@ internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
         return Task.FromResult(true);
     }
 
-    public Task<bool> IsResultPublishedAsync(string fixtureId, CancellationToken cancellationToken) => Task.FromResult(_results.Contains(fixtureId));
+    public Task<bool> IsResultPublishedAsync(string fixtureId, int resultVersion, CancellationToken cancellationToken) => Task.FromResult(_results.Contains($"{fixtureId}:{resultVersion}"));
 
-    public Task MarkResultPublishedAsync(string fixtureId, CancellationToken cancellationToken)
+    public Task MarkResultPublishedAsync(string fixtureId, int resultVersion, CancellationToken cancellationToken)
     {
-        _results.Add(fixtureId);
+        _results.Add($"{fixtureId}:{resultVersion}");
         return Task.CompletedTask;
     }
 

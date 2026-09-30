@@ -37,11 +37,39 @@ public sealed class ReplayEngineTests
         offer.Published.Count.ShouldBe(1);
     }
 
-    private static (ReplayEngine Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build()
+    [Fact]
+    public async Task Designated_match_has_its_result_corrected_once_with_a_different_outcome()
+    {
+        var (engine, offer, clock) = Build(correctionEvery: 1);
+
+        foreach (var seconds in new[] { 5, 25, 35, 36 })
+        {
+            clock.SetUtcNow(Epoch.AddSeconds(seconds));
+            await engine.TickAsync(CancellationToken.None);
+        }
+
+        offer.Results.Select(r => (r.ResultVersion, r.Status, r.HomeGoals, r.AwayGoals)).ShouldBe([(1, Contracts.Offer.ResultStatus.Official, 2, 1), (2, Contracts.Offer.ResultStatus.Correction, 1, 2)]);
+    }
+
+    [Fact]
+    public async Task Match_not_designated_for_correction_keeps_its_official_result()
+    {
+        var (engine, offer, clock) = Build(correctionEvery: 0);
+
+        foreach (var seconds in new[] { 5, 25, 35 })
+        {
+            clock.SetUtcNow(Epoch.AddSeconds(seconds));
+            await engine.TickAsync(CancellationToken.None);
+        }
+
+        offer.Results.ShouldHaveSingleItem().ResultVersion.ShouldBe(1);
+    }
+
+    private static (ReplayEngine Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build(int correctionEvery = 0)
     {
         var offer = new InMemoryOffer();
         var clock = new FakeTimeProvider(Epoch);
-        var options = Options.Create(new ReplayOptions { SlotSeconds = 10, ListLeadSlots = 1, Epoch = Epoch });
+        var options = Options.Create(new ReplayOptions { SlotSeconds = 10, ListLeadSlots = 1, Epoch = Epoch, CorrectionEvery = correctionEvery });
         return (new ReplayEngine(new OneMatchSeason(), offer, offer, options, clock), offer, clock);
     }
 

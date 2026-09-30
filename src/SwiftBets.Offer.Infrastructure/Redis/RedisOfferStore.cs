@@ -42,11 +42,11 @@ public sealed class RedisOfferStore(IConnectionMultiplexer redis) : IOfferStore
         return (long)result == 1;
     }
 
-    public async Task<bool> IsResultPublishedAsync(string fixtureId, CancellationToken cancellationToken) =>
-        await redis.GetDatabase().KeyExistsAsync(OfferKeys.ResultPublished(fixtureId));
+    public async Task<bool> IsResultPublishedAsync(string fixtureId, int resultVersion, CancellationToken cancellationToken) =>
+        await redis.GetDatabase().KeyExistsAsync(OfferKeys.ResultPublished(fixtureId, resultVersion));
 
-    public Task MarkResultPublishedAsync(string fixtureId, CancellationToken cancellationToken) =>
-        redis.GetDatabase().StringSetAsync(OfferKeys.ResultPublished(fixtureId), "1", Retention);
+    public Task MarkResultPublishedAsync(string fixtureId, int resultVersion, CancellationToken cancellationToken) =>
+        redis.GetDatabase().StringSetAsync(OfferKeys.ResultPublished(fixtureId, resultVersion), "1", Retention);
 
     private static string ReadScript(string name)
     {

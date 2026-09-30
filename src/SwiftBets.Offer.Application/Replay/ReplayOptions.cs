@@ -17,5 +17,9 @@ public sealed class ReplayOptions
     [Range(1, 60)]
     public int TickSeconds { get; set; } = 2;
 
+    /// <summary>Every Nth match gets its official result corrected one slot later (0 disables), so resettlement runs live.</summary>
+    [Range(0, 1000)]
+    public int CorrectionEvery { get; set; } = 25;
+
     public DateTimeOffset Epoch { get; set; } = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 }

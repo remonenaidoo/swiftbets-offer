@@ -23,7 +23,7 @@ public sealed class ReplayEngine(ISeasonSource season, IOfferStore store, IOffer
     {
         var now = time.GetUtcNow();
         var changes = 0;
-        foreach (var slot in _timeline.ActiveAt(now, TimeSpan.FromSeconds(options.Value.SlotSeconds * 2)))
+        foreach (var slot in _timeline.ActiveAt(now, TimeSpan.FromSeconds(options.Value.SlotSeconds * 3)))
         {
             changes += await SyncAsync(slot, now, cancellationToken);
         }
@@ -55,15 +55,32 @@ public sealed class ReplayEngine(ISeasonSource season, IOfferStore store, IOffer
             }
         }
 
-        if (phase == FixturePhase.Finished && !await store.IsResultPublishedAsync(slot.FixtureId, cancellationToken))
+        if (phase == FixturePhase.Finished && !await store.IsResultPublishedAsync(slot.FixtureId, 1, cancellationToken))
         {
             await events.ResultPublishedAsync(
                 new ResultPublishedV1(slot.FixtureId, 1, ResultStatus.Official, slot.Match.HomeGoals, slot.Match.AwayGoals, now),
                 cancellationToken);
-            await store.MarkResultPublishedAsync(slot.FixtureId, cancellationToken);
+            await store.MarkResultPublishedAsync(slot.FixtureId, 1, cancellationToken);
+            changes++;
+        }
+
+        if (IsCorrected(slot.Match) && now >= slot.ResultAt + (slot.ResultAt - slot.KickoffAt)
+            && await store.IsResultPublishedAsync(slot.FixtureId, 1, cancellationToken)
+            && !await store.IsResultPublishedAsync(slot.FixtureId, 2, cancellationToken))
+        {
+            var (home, away) = CorrectedScore(slot.Match);
+            await events.ResultPublishedAsync(new ResultPublishedV1(slot.FixtureId, 2, ResultStatus.Correction, home, away, now), cancellationToken);
+            await store.MarkResultPublishedAsync(slot.FixtureId, 2, cancellationToken);
             changes++;
         }
 
         return changes;
     }
+
+    private bool IsCorrected(HistoricalMatch match) =>
+        options.Value.CorrectionEvery > 0 && match.Index % options.Value.CorrectionEvery == options.Value.CorrectionEvery - 1;
+
+    /// <summary>A corrected score that changes the match result: a draw gains a late home goal; otherwise the goals swap sides.</summary>
+    private static (int Home, int Away) CorrectedScore(HistoricalMatch match) =>
+        match.HomeGoals == match.AwayGoals ? (match.HomeGoals + 1, match.AwayGoals) : (match.AwayGoals, match.HomeGoals);
 }
