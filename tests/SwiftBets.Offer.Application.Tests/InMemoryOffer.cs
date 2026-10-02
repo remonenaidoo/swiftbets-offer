@@ -15,6 +15,8 @@ internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
 
     public List<ManualResultV1> ManualResults { get; } = [];
 
+    public List<MarketStatusChangedV1> StatusChanges { get; } = [];
+
     public Task<FixtureChangedV1?> GetAsync(string fixtureId, CancellationToken cancellationToken) =>
         Task.FromResult(_fixtures.GetValueOrDefault(fixtureId));
 
@@ -55,6 +57,12 @@ internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
     public Task ManualResultAsync(ManualResultV1 result, CancellationToken cancellationToken)
     {
         ManualResults.Add(result);
+        return Task.CompletedTask;
+    }
+
+    public Task MarketStatusChangedAsync(MarketStatusChangedV1 change, CancellationToken cancellationToken)
+    {
+        StatusChanges.Add(change);
         return Task.CompletedTask;
     }
 }

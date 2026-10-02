@@ -1,6 +1,7 @@
 using SwiftBets.Contracts.Errors;
 using SwiftBets.Contracts.Offer;
 using SwiftBets.Contracts.Results;
+using SwiftBets.Contracts.Trading;
 using SwiftBets.Offer.Application.Ports;
 
 namespace SwiftBets.Offer.Application.Markets;
@@ -41,6 +42,7 @@ public sealed class SetMarketStatusHandler(IOfferStore store, IOfferEvents event
             if (await store.TrySaveAsync(next, current.OfferVersion, cancellationToken))
             {
                 await events.FixtureChangedAsync(next, cancellationToken);
+                await events.MarketStatusChangedAsync(new MarketStatusChangedV1(fixtureId, marketId, target, "trader", suspend ? "suspended by an operator" : "resumed by an operator", null, next.ChangedAt), cancellationToken);
                 return Result.Success(next);
             }
         }
