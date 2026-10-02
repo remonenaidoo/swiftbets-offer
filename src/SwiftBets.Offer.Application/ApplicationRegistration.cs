@@ -10,6 +10,7 @@ public static class ApplicationRegistration
     public static IServiceCollection AddOfferApplication(this IServiceCollection services)
     {
         services.AddSingleton<FeedSync>();
+        services.AddSingleton<StalenessGuard>();
         services.AddSingleton<SetMarketStatusHandler>();
         services.AddSingleton<Trading.IssueManualResultHandler>();
         services.AddSingleton<OfferQueries>();

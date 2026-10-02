@@ -31,7 +31,7 @@ public sealed class ReplayFeedAdapter(ISeasonSource season, IOptions<ReplayOptio
             var status = phase == FixturePhase.Open ? FixtureStatus.Scheduled : phase == FixturePhase.AwaitingResult ? FixtureStatus.InPlay : FixtureStatus.Finished;
             var marketStatus = phase == FixturePhase.Open ? MarketStatus.Open : phase == FixturePhase.AwaitingResult ? MarketStatus.Suspended : MarketStatus.Closed;
             fixtures.Add(new FeedFixture(slot.FixtureId, season.Competition, slot.Match.HomeTeam, slot.Match.AwayTeam, slot.KickoffAt, status,
-                OfferSnapshots.PricedMarkets(slot.FixtureId, slot.Match, slot.PriceProgressAt(now), marketStatus)));
+                OfferSnapshots.PricedMarkets(slot.FixtureId, slot.Match, slot.PriceProgressAt(now), marketStatus), now));
 
             if (phase == FixturePhase.Finished)
             {

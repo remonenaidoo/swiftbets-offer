@@ -8,7 +8,7 @@ namespace SwiftBets.Offer.Application.Feed;
 /// and each result version is published once. Operator suspensions survive a feed that still shows the market open;
 /// only a resume reopens it. The feed's job is price correctness; availability and versioning are ours.
 /// </summary>
-public sealed class FeedSync(IFeedAdapter feed, IOfferStore store, IOfferEvents events, TimeProvider time)
+public sealed class FeedSync(IFeedAdapter feed, IOfferStore store, IOfferEvents events, IFeedHealthStore health, TimeProvider time)
 {
     public async Task<int> TickAsync(CancellationToken cancellationToken)
     {
@@ -18,6 +18,7 @@ public sealed class FeedSync(IFeedAdapter feed, IOfferStore store, IOfferEvents 
         foreach (var fixture in poll.Fixtures)
         {
             changes += await ApplyFixtureAsync(fixture, now, cancellationToken);
+            await health.RecordSeenAsync(fixture.FixtureId, fixture.UpdatedAt, cancellationToken);
         }
 
         foreach (var result in poll.Results)
