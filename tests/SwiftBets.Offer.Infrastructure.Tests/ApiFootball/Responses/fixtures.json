@@ -1,0 +1,11 @@
+{"get":"fixtures","parameters":{"league":"39","season":"2026"},"errors":[],"results":2,"paging":{"current":1,"total":1},
+ "response":[
+  {"fixture":{"id":1300001,"referee":null,"timezone":"UTC","date":"2026-10-04T14:00:00+00:00","timestamp":1791122400,"venue":{"id":494,"name":"Emirates Stadium","city":"London"},"status":{"long":"Not Started","short":"NS","elapsed":null}},
+   "league":{"id":39,"name":"Premier League","country":"England","season":2026,"round":"Regular Season - 7"},
+   "teams":{"home":{"id":42,"name":"Arsenal","winner":null},"away":{"id":49,"name":"Chelsea","winner":null}},
+   "goals":{"home":null,"away":null},"score":{"halftime":{"home":null,"away":null},"fulltime":{"home":null,"away":null}}},
+  {"fixture":{"id":1300002,"referee":"M. Oliver","timezone":"UTC","date":"2026-10-01T19:00:00+00:00","timestamp":1790881200,"venue":{"id":556,"name":"Old Trafford","city":"Manchester"},"status":{"long":"Match Finished","short":"FT","elapsed":90}},
+   "league":{"id":39,"name":"Premier League","country":"England","season":2026,"round":"Regular Season - 6"},
+   "teams":{"home":{"id":33,"name":"Manchester United","winner":true},"away":{"id":40,"name":"Liverpool","winner":false}},
+   "goals":{"home":2,"away":1},"score":{"halftime":{"home":1,"away":0},"fulltime":{"home":2,"away":1}}}
+ ]}

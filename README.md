@@ -42,6 +42,21 @@ Multi-arch (amd64 + arm64), non-root, chiseled runtime:
 
 - `ghcr.io/remonenaidoo/swiftbets-offer`
 
+## Real feed (API-Football)
+
+Replay is the default feed. To switch to API-Football v3:
+
+| Setting | Value |
+| --- | --- |
+| `ApiFootball__Enabled` | `true` |
+| `ApiFootball__ApiKey` | the provider key (required; startup fails without it) |
+| `ApiFootball__LeagueIds__0` | `39` (Premier League), more leagues as extra indexes |
+| `ApiFootball__Season` | the season's start year |
+| `ApiFootball__RefreshMinutes` | `30` keeps one league inside the free tier's 100 requests a day (3 per refresh) |
+| `Feed__StaleAfterSeconds` | longer than the provider's odds update interval, or every market suspends between updates |
+
+Contract tests run the adapter over response bodies in `tests/SwiftBets.Offer.Infrastructure.Tests/ApiFootball/Responses`; `scripts/record-api-football.sh` replaces them with live recordings once a key exists.
+
 ## License
 
 MIT

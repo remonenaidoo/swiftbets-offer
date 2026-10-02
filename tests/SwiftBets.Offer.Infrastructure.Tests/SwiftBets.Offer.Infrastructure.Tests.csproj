@@ -7,11 +7,15 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="SwiftBets.BuildingBlocks.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <ProjectReference Include="../../src/SwiftBets.Offer.Infrastructure/SwiftBets.Offer.Infrastructure.csproj" />
     <ProjectReference Include="../../src/SwiftBets.Offer.Migrator/SwiftBets.Offer.Migrator.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="Shouldly" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ApiFootball/Responses/*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
