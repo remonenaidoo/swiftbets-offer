@@ -6,11 +6,15 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="SwiftBets.BuildingBlocks.Messaging" />
     <PackageReference Include="SwiftBets.BuildingBlocks.Redis" />
+    <PackageReference Include="SwiftBets.BuildingBlocks.Persistence" />
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Npgsql" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <ProjectReference Include="../SwiftBets.Offer.Application/SwiftBets.Offer.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Data/*.json" />
     <EmbeddedResource Include="Redis/*.lua" />
+    <EmbeddedResource Include="Catalog/Sql/*.sql" />
   </ItemGroup>
 </Project>

@@ -11,6 +11,9 @@ public static class OfferEndpoints
 {
     public static IEndpointRouteBuilder MapOfferEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        endpoints.MapGet("/catalog/sports", async (OfferQueries queries, CancellationToken cancellationToken) =>
+            Results.Json(await queries.ListSportsAsync(cancellationToken), ContractJson.Options));
+
         var fixtures = endpoints.MapGroup("/fixtures");
 
         fixtures.MapGet("/", async (OfferQueries queries, int? limit, CancellationToken cancellationToken) =>
