@@ -1,11 +1,13 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SwiftBets.Offer.Application.Feed;
 using SwiftBets.Offer.Application.Replay;
 
-namespace SwiftBets.Offer.Infrastructure.Replay;
+namespace SwiftBets.Offer.Infrastructure.Feed;
 
-public sealed partial class ReplayWorker(ReplayEngine engine, IOptions<ReplayOptions> options, TimeProvider time, ILogger<ReplayWorker> logger) : BackgroundService
+/// <summary>Polls the configured feed on a fixed tick and applies it; a failed tick is logged and retried on the next.</summary>
+public sealed partial class FeedWorker(FeedSync sync, IOptions<ReplayOptions> options, TimeProvider time, ILogger<FeedWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -14,7 +16,7 @@ public sealed partial class ReplayWorker(ReplayEngine engine, IOptions<ReplayOpt
         {
             try
             {
-                var changes = await engine.TickAsync(stoppingToken);
+                var changes = await sync.TickAsync(stoppingToken);
                 if (changes > 0)
                 {
                     LogTick(changes);
@@ -28,9 +30,9 @@ public sealed partial class ReplayWorker(ReplayEngine engine, IOptions<ReplayOpt
         while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Replay tick applied {Changes} changes")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Feed tick applied {Changes} changes")]
     private partial void LogTick(int changes);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Replay tick failed; retrying on the next tick")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Feed tick failed; retrying on the next tick")]
     private partial void LogTickFailed(Exception exception);
 }

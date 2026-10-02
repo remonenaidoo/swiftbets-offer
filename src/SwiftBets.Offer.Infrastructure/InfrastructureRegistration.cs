@@ -5,9 +5,9 @@ using SwiftBets.BuildingBlocks.Messaging;
 using SwiftBets.BuildingBlocks.Redis;
 using SwiftBets.Offer.Application.Ports;
 using SwiftBets.Offer.Application.Replay;
+using SwiftBets.Offer.Infrastructure.Feed;
 using SwiftBets.Offer.Infrastructure.Messaging;
 using SwiftBets.Offer.Infrastructure.Redis;
-using SwiftBets.Offer.Infrastructure.Replay;
 using SwiftBets.Offer.Infrastructure.Season;
 
 namespace SwiftBets.Offer.Infrastructure;
@@ -23,9 +23,10 @@ public static class InfrastructureRegistration
         services.AddSingleton<ISeasonSource, EmbeddedSeasonSource>();
         services.AddSingleton<IOfferStore, RedisOfferStore>();
         services.AddSingleton<IOfferEvents, KafkaOfferEvents>();
+        services.AddSingleton<IFeedAdapter, ReplayFeedAdapter>();
         if (configuration.GetValue("Replay:Enabled", true))
         {
-            services.AddHostedService<ReplayWorker>();
+            services.AddHostedService<FeedWorker>();
         }
 
         return services;
