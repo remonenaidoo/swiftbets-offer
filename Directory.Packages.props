@@ -16,7 +16,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.12" />
     <PackageVersion Include="SwiftBets.BuildingBlocks.Web" Version="0.7.0" />
-    <PackageVersion Include="SwiftBets.Contracts" Version="1.1.0" />
+    <PackageVersion Include="SwiftBets.Contracts" Version="2.0.0" />
     <PackageVersion Include="xunit.v3" Version="4.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
