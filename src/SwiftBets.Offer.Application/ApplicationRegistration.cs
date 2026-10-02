@@ -11,6 +11,7 @@ public static class ApplicationRegistration
     {
         services.AddSingleton<ReplayEngine>();
         services.AddSingleton<SetMarketStatusHandler>();
+        services.AddSingleton<Trading.IssueManualResultHandler>();
         services.AddSingleton<OfferQueries>();
         return services;
     }

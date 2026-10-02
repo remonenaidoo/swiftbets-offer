@@ -1,4 +1,5 @@
 using SwiftBets.Contracts.Offer;
+using SwiftBets.Contracts.Trading;
 using SwiftBets.Offer.Application.Ports;
 
 namespace SwiftBets.Offer.Application.Tests;
@@ -11,6 +12,8 @@ internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
     public List<FixtureChangedV1> Published { get; } = [];
 
     public List<ResultPublishedV1> Results { get; } = [];
+
+    public List<ManualResultV1> ManualResults { get; } = [];
 
     public Task<FixtureChangedV1?> GetAsync(string fixtureId, CancellationToken cancellationToken) =>
         Task.FromResult(_fixtures.GetValueOrDefault(fixtureId));
@@ -46,6 +49,12 @@ internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
     public Task ResultPublishedAsync(ResultPublishedV1 result, CancellationToken cancellationToken)
     {
         Results.Add(result);
+        return Task.CompletedTask;
+    }
+
+    public Task ManualResultAsync(ManualResultV1 result, CancellationToken cancellationToken)
+    {
+        ManualResults.Add(result);
         return Task.CompletedTask;
     }
 }
