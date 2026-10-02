@@ -8,7 +8,7 @@ namespace SwiftBets.Offer.Application.Trading;
 /// <summary>A trader's result, checked against the offer and published for settlement to apply.</summary>
 public sealed class IssueManualResultHandler(IOfferStore store, IOfferEvents events, TimeProvider time)
 {
-    public sealed record Request(ManualResultScope Scope, ManualResultAction Action, string FixtureId, string? MarketId, Guid? CouponId, string? WinningSelectionId, string Reason);
+    public sealed record Request(ManualResultScope Scope, ManualResultAction Action, string FixtureId, string? MarketId, Guid? CouponId, string? WinningSelectionId, string Reason, DateTimeOffset? VoidFrom = null);
 
     public async Task<Result<ManualResultV1>> HandleAsync(Request request, Guid operatorId, CancellationToken cancellationToken)
     {
@@ -18,9 +18,11 @@ public sealed class IssueManualResultHandler(IOfferStore store, IOfferEvents eve
             return Error.Validation("reason_required", "Give a reason for the manual result.");
         }
 
-        if (request.Action == ManualResultAction.TimeVoid)
+        var now = time.GetUtcNow();
+        var timeVoid = request.Action == ManualResultAction.TimeVoid;
+        if (timeVoid != request.VoidFrom.HasValue || request.VoidFrom > now)
         {
-            return Error.Validation("time_void_unavailable", "Time-void needs placement times in settlement and is not available yet.");
+            return Error.Validation("void_from_invalid", "A time-void names a cut-off in the past; other actions name none.");
         }
 
         if ((request.Scope == ManualResultScope.Market && string.IsNullOrEmpty(request.MarketId)) || (request.Scope == ManualResultScope.Coupon && request.CouponId is null))
@@ -41,9 +43,8 @@ public sealed class IssueManualResultHandler(IOfferStore store, IOfferEvents eve
             return Error.Validation("winner_invalid", "Settle and override name a winning selection on the market; void names none.");
         }
 
-        var now = time.GetUtcNow();
         var result = new ManualResultV1(Guid.NewGuid(), request.Scope, request.Action, request.FixtureId, request.MarketId, request.CouponId,
-            request.WinningSelectionId, null, request.Reason.Trim(), operatorId, now);
+            request.WinningSelectionId, request.VoidFrom, request.Reason.Trim(), operatorId, now);
         await events.ManualResultAsync(result, cancellationToken);
         return Result.Success(result);
     }
