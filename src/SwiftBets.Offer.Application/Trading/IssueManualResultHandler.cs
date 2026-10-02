@@ -6,7 +6,7 @@ using SwiftBets.Offer.Application.Ports;
 namespace SwiftBets.Offer.Application.Trading;
 
 /// <summary>A trader's result, checked against the offer and published for settlement to apply.</summary>
-public sealed class IssueManualResultHandler(IOfferStore store, IOfferEvents events, TimeProvider time)
+public sealed class IssueManualResultHandler(IOfferStore store, IOfferEvents events, IManualResultLog log, TimeProvider time)
 {
     public sealed record Request(ManualResultScope Scope, ManualResultAction Action, string FixtureId, string? MarketId, Guid? CouponId, string? WinningSelectionId, string Reason, DateTimeOffset? VoidFrom = null);
 
@@ -45,6 +45,7 @@ public sealed class IssueManualResultHandler(IOfferStore store, IOfferEvents eve
 
         var result = new ManualResultV1(Guid.NewGuid(), request.Scope, request.Action, request.FixtureId, request.MarketId, request.CouponId,
             request.WinningSelectionId, request.VoidFrom, request.Reason.Trim(), operatorId, now);
+        await log.RecordIssuedAsync(result, cancellationToken);
         await events.ManualResultAsync(result, cancellationToken);
         return Result.Success(result);
     }

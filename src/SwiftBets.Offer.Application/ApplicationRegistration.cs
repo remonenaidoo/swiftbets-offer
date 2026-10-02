@@ -14,6 +14,7 @@ public static class ApplicationRegistration
         services.AddSingleton<SetMarketStatusHandler>();
         services.AddSingleton<Trading.IssueManualResultHandler>();
         services.AddSingleton<OfferQueries>();
+        services.AddSingleton<Drills.PublishResultDrill>();
         return services;
     }
 }
