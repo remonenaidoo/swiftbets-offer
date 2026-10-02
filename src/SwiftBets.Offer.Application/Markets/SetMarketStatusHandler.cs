@@ -22,12 +22,12 @@ public sealed class SetMarketStatusHandler(IOfferStore store, IOfferEvents event
                 return Error.NotFound("market_not_found", $"Market {marketId} is not on fixture {fixtureId}.");
             }
 
-            if (market.Status == MarketStatus.Closed || (!suspend && current.Status != FixtureStatus.Scheduled))
+            var target = suspend ? MarketStatus.Suspended : MarketStatus.Open;
+            if (!MarketLifecycle.CanMove(market.Status, target) || (!suspend && current.Status != FixtureStatus.Scheduled))
             {
                 return Error.Conflict("market_not_tradable", "The market has closed.");
             }
 
-            var target = suspend ? MarketStatus.Suspended : MarketStatus.Open;
             if (market.Status == target)
             {
                 return Result.Success(current);
