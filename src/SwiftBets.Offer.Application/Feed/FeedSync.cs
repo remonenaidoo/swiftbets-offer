@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SwiftBets.Contracts.Offer;
 using SwiftBets.Offer.Application.Catalog;
+using SwiftBets.Offer.Application.Markets;
 using SwiftBets.Offer.Application.Ports;
 
 namespace SwiftBets.Offer.Application.Feed;
@@ -70,6 +71,12 @@ public sealed partial class FeedSync(IFeedAdapter feed, IOfferStore store, IOffe
     {
         var current = await store.GetAsync(fixture.FixtureId, cancellationToken);
         var markets = fixture.Markets;
+        if (current is not null)
+        {
+            var stored = current.Markets.ToDictionary(m => m.MarketId, m => m.Status, StringComparer.Ordinal);
+            markets = [.. markets.Select(m => stored.TryGetValue(m.MarketId, out var was) ? m with { Status = MarketLifecycle.Next(was, m.Status) } : m)];
+        }
+
         if (current is not null && fixture.Status == FixtureStatus.Scheduled)
         {
             var suspended = current.Markets.Where(m => m.Status == MarketStatus.Suspended).Select(m => m.MarketId).ToHashSet(StringComparer.Ordinal);
