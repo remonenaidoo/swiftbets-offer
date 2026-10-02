@@ -4,6 +4,7 @@
     <Project Path="src/SwiftBets.Offer.Application/SwiftBets.Offer.Application.csproj" />
     <Project Path="src/SwiftBets.Offer.Domain/SwiftBets.Offer.Domain.csproj" />
     <Project Path="src/SwiftBets.Offer.Infrastructure/SwiftBets.Offer.Infrastructure.csproj" />
+    <Project Path="src/SwiftBets.Offer.Migrator/SwiftBets.Offer.Migrator.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SwiftBets.Offer.Api.Tests/SwiftBets.Offer.Api.Tests.csproj" />

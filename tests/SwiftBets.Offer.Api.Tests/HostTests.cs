@@ -76,6 +76,7 @@ public sealed class HostTests : IClassFixture<HostTests.Factory>
         {
         builder.UseSetting("Kafka:BootstrapServers", "127.0.0.1:1");
         builder.UseSetting("ConnectionStrings:Redis", "127.0.0.1:1,connectTimeout=200");
+        builder.UseSetting("ConnectionStrings:SbCatalog", "Host=127.0.0.1;Port=1;Database=sb_catalog;Username=x;Password=x;Timeout=1");
             builder.UseSetting("Replay:Enabled", "false");
             builder.UseSetting("Jwt:Authority", TestJwt.Issuer);
             builder.ConfigureServices(services => services.UseTestJwt());

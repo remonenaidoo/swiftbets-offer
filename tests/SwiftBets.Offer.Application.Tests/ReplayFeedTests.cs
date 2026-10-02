@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using SwiftBets.Offer.Application.Feed;
@@ -54,6 +55,29 @@ public sealed class ReplayFeedTests
     }
 
     [Fact]
+    public async Task A_listed_fixture_reaches_the_catalogue_under_its_competition()
+    {
+        var catalog = new InMemoryCatalog();
+        var (engine, _, clock) = Build(catalog: catalog);
+        clock.SetUtcNow(Epoch.AddSeconds(5));
+
+        await engine.TickAsync(CancellationToken.None);
+
+        var fixture = catalog.Fixtures.Values.ShouldHaveSingleItem();
+        (fixture.SportId, fixture.CompetitionId, fixture.Status, fixture.OfferVersion).ShouldBe(("soccer", "premier-league", "scheduled", 1L));
+    }
+
+    [Fact]
+    public async Task A_catalogue_outage_never_stops_the_offer()
+    {
+        var (engine, offer, clock) = Build(catalog: new InMemoryCatalog { Fail = true });
+        clock.SetUtcNow(Epoch.AddSeconds(5));
+
+        (await engine.TickAsync(CancellationToken.None)).ShouldBe(1);
+        offer.Published.ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task Designated_match_has_its_result_corrected_once_with_a_different_outcome()
     {
         var (engine, offer, clock) = Build(correctionEvery: 1);
@@ -81,12 +105,12 @@ public sealed class ReplayFeedTests
         offer.Results.ShouldHaveSingleItem().ResultVersion.ShouldBe(1);
     }
 
-    private static (FeedSync Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build(int correctionEvery = 0)
+    private static (FeedSync Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build(int correctionEvery = 0, InMemoryCatalog? catalog = null)
     {
         var offer = new InMemoryOffer();
         var clock = new FakeTimeProvider(Epoch);
         var options = Options.Create(new ReplayOptions { SlotSeconds = 10, ListLeadSlots = 1, Epoch = Epoch, CorrectionEvery = correctionEvery });
-        return (new FeedSync(new ReplayFeedAdapter(new OneMatchSeason(), options), offer, offer, new InMemoryFeedHealth(), clock), offer, clock);
+        return (new FeedSync(new ReplayFeedAdapter(new OneMatchSeason(), options), offer, offer, new InMemoryFeedHealth(), catalog ?? new InMemoryCatalog(), clock, NullLogger<FeedSync>.Instance), offer, clock);
     }
 
     private sealed class OneMatchSeason : ISeasonSource

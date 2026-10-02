@@ -8,6 +8,7 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="SwiftBets.BuildingBlocks.Testing" />
     <ProjectReference Include="../../src/SwiftBets.Offer.Infrastructure/SwiftBets.Offer.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/SwiftBets.Offer.Migrator/SwiftBets.Offer.Migrator.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
