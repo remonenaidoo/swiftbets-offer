@@ -16,6 +16,7 @@ public sealed class SetMarketStatusHandlerTests
         result.Value.OfferVersion.ShouldBe(2);
         result.Value.Markets.Single().Status.ShouldBe(MarketStatus.Suspended);
         offer.Published.ShouldHaveSingleItem();
+        offer.StatusChanges.ShouldHaveSingleItem().Status.ShouldBe(MarketStatus.Suspended);
     }
 
     [Fact]

@@ -10,4 +10,6 @@ public interface IOfferEvents
     Task ResultPublishedAsync(ResultPublishedV1 result, CancellationToken cancellationToken);
 
     Task ManualResultAsync(ManualResultV1 result, CancellationToken cancellationToken);
+
+    Task MarketStatusChangedAsync(MarketStatusChangedV1 change, CancellationToken cancellationToken);
 }

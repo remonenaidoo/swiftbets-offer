@@ -22,6 +22,9 @@ public sealed class KafkaOfferEvents(IEventPublisher publisher, TimeProvider tim
     public Task ManualResultAsync(ManualResultV1 result, CancellationToken cancellationToken) =>
         publisher.PublishAsync(Topics.ManualResult, result.FixtureId, Envelope(result), cancellationToken);
 
+    public Task MarketStatusChangedAsync(MarketStatusChangedV1 change, CancellationToken cancellationToken) =>
+        publisher.PublishAsync(Topics.MarketStatusChanged, change.FixtureId, Envelope(change), cancellationToken);
+
     private EventEnvelope<T> Envelope<T>(T payload)
         where T : IEventContract =>
         EventEnvelope<T>.Create(payload, time.GetUtcNow(), CorrelationContext.CorrelationId ?? CorrelationContext.NewId());
