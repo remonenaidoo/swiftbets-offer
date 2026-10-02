@@ -2,6 +2,7 @@ using SwiftBets.BuildingBlocks.Core;
 using SwiftBets.BuildingBlocks.Messaging;
 using SwiftBets.Contracts.Messaging;
 using SwiftBets.Contracts.Offer;
+using SwiftBets.Contracts.Trading;
 using SwiftBets.Offer.Application.Ports;
 
 namespace SwiftBets.Offer.Infrastructure.Messaging;
@@ -17,6 +18,9 @@ public sealed class KafkaOfferEvents(IEventPublisher publisher, TimeProvider tim
 
     public Task ResultPublishedAsync(ResultPublishedV1 result, CancellationToken cancellationToken) =>
         publisher.PublishAsync(Topics.ResultPublished, result.FixtureId, Envelope(result), cancellationToken);
+
+    public Task ManualResultAsync(ManualResultV1 result, CancellationToken cancellationToken) =>
+        publisher.PublishAsync(Topics.ManualResult, result.FixtureId, Envelope(result), cancellationToken);
 
     private EventEnvelope<T> Envelope<T>(T payload)
         where T : IEventContract =>

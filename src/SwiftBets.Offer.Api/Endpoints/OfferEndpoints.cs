@@ -3,6 +3,7 @@ using SwiftBets.Contracts.Errors;
 using SwiftBets.Contracts.Serialization;
 using SwiftBets.Offer.Application.Markets;
 using SwiftBets.Offer.Application.Queries;
+using SwiftBets.Offer.Application.Trading;
 
 namespace SwiftBets.Offer.Api.Endpoints;
 
@@ -27,6 +28,14 @@ public static class OfferEndpoints
         fixtures.MapPost("/{fixtureId}/markets/{marketId}/resume", (string fixtureId, string marketId, SetMarketStatusHandler handler, HttpContext context, CancellationToken cancellationToken) =>
             SetStatusAsync(handler, fixtureId, marketId, suspend: false, context, cancellationToken))
             .RequireAuthorization(Roles.Operator);
+
+        endpoints.MapPost("/admin/trading/manual-results", async (IssueManualResultHandler.Request request, IssueManualResultHandler handler, HttpContext context, CancellationToken cancellationToken) =>
+        {
+            var operatorId = Guid.TryParse(context.User.FindFirst("sub")?.Value, out var id) ? id : Guid.Empty;
+            var result = await handler.HandleAsync(request, operatorId, cancellationToken);
+            return result.IsSuccess ? Results.Json(result.Value, ContractJson.Options, statusCode: StatusCodes.Status202Accepted) : result.ToHttpResult(context);
+        })
+        .RequireAuthorization(Roles.Operator);
 
         return endpoints;
     }
