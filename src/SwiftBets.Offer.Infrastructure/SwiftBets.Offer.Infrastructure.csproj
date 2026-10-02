@@ -9,6 +9,7 @@
     <PackageReference Include="SwiftBets.BuildingBlocks.Persistence" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="Npgsql" />
+    <PackageReference Include="SwiftBets.BuildingBlocks.Resilience" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <ProjectReference Include="../SwiftBets.Offer.Application/SwiftBets.Offer.Application.csproj" />
   </ItemGroup>
@@ -16,5 +17,8 @@
     <EmbeddedResource Include="Data/*.json" />
     <EmbeddedResource Include="Redis/*.lua" />
     <EmbeddedResource Include="Catalog/Sql/*.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="SwiftBets.Offer.Infrastructure.Tests" />
   </ItemGroup>
 </Project>
