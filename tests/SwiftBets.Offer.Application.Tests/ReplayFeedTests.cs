@@ -1,12 +1,13 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
+using SwiftBets.Offer.Application.Feed;
 using SwiftBets.Offer.Application.Ports;
 using SwiftBets.Offer.Application.Replay;
 using SwiftBets.Offer.Domain;
 
 namespace SwiftBets.Offer.Application.Tests;
 
-public sealed class ReplayEngineTests
+public sealed class ReplayFeedTests
 {
     private static readonly DateTimeOffset Epoch = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
@@ -38,6 +39,21 @@ public sealed class ReplayEngineTests
     }
 
     [Fact]
+    public async Task An_operator_suspension_survives_a_feed_that_still_prices_the_market_open()
+    {
+        var (engine, offer, clock) = Build();
+        clock.SetUtcNow(Epoch.AddSeconds(5));
+        await engine.TickAsync(CancellationToken.None);
+        var listed = offer.Published[^1];
+        await offer.TrySaveAsync(listed with { OfferVersion = 2, Markets = [.. listed.Markets.Select(m => m with { Status = Contracts.Offer.MarketStatus.Suspended })] }, 1, CancellationToken.None);
+
+        clock.SetUtcNow(Epoch.AddSeconds(6));
+        await engine.TickAsync(CancellationToken.None);
+
+        (await offer.GetAsync(listed.FixtureId, CancellationToken.None))!.Markets.ShouldAllBe(m => m.Status == Contracts.Offer.MarketStatus.Suspended);
+    }
+
+    [Fact]
     public async Task Designated_match_has_its_result_corrected_once_with_a_different_outcome()
     {
         var (engine, offer, clock) = Build(correctionEvery: 1);
@@ -65,12 +81,12 @@ public sealed class ReplayEngineTests
         offer.Results.ShouldHaveSingleItem().ResultVersion.ShouldBe(1);
     }
 
-    private static (ReplayEngine Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build(int correctionEvery = 0)
+    private static (FeedSync Engine, InMemoryOffer Offer, FakeTimeProvider Clock) Build(int correctionEvery = 0)
     {
         var offer = new InMemoryOffer();
         var clock = new FakeTimeProvider(Epoch);
         var options = Options.Create(new ReplayOptions { SlotSeconds = 10, ListLeadSlots = 1, Epoch = Epoch, CorrectionEvery = correctionEvery });
-        return (new ReplayEngine(new OneMatchSeason(), offer, offer, options, clock), offer, clock);
+        return (new FeedSync(new ReplayFeedAdapter(new OneMatchSeason(), options), offer, offer, clock), offer, clock);
     }
 
     private sealed class OneMatchSeason : ISeasonSource

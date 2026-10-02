@@ -28,9 +28,4 @@ public static class OfferSnapshots
         ];
     }
 
-    /// <summary>True when prices or statuses differ, ignoring the version and timestamp.</summary>
-    public static bool OfferDiffers(FixtureChangedV1 current, FixtureStatus status, IReadOnlyList<MarketV1> markets) =>
-        current.Status != status
-        || current.Markets.Count != markets.Count
-        || current.Markets.Zip(markets).Any(p => p.First.Status != p.Second.Status || !p.First.Selections.SequenceEqual(p.Second.Selections));
 }
