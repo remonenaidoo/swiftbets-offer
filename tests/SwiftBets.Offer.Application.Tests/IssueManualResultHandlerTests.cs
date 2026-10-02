@@ -24,7 +24,7 @@ public sealed class IssueManualResultHandlerTests
     [InlineData(ManualResultScope.Market, ManualResultAction.Settle, "fx-1x2", "away", "winner_invalid")]
     [InlineData(ManualResultScope.Market, ManualResultAction.Void, "fx-1x2", "home", "winner_invalid")]
     [InlineData(ManualResultScope.Market, ManualResultAction.Void, null, null, "scope_incomplete")]
-    [InlineData(ManualResultScope.Market, ManualResultAction.TimeVoid, "fx-1x2", null, "time_void_unavailable")]
+    [InlineData(ManualResultScope.Market, ManualResultAction.TimeVoid, "fx-1x2", null, "void_from_invalid")]
     [InlineData(ManualResultScope.Market, ManualResultAction.Void, "nope", null, "market_not_found")]
     public async Task Invalid_requests_are_refused_and_nothing_is_published(ManualResultScope scope, ManualResultAction action, string? market, string? winner, string code)
     {
@@ -34,6 +34,18 @@ public sealed class IssueManualResultHandlerTests
 
         result.Error!.Code.ShouldBe(code);
         offer.ManualResults.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task A_time_void_carries_its_cut_off_to_settlement()
+    {
+        var offer = await SeededAsync();
+        var cutOff = DateTimeOffset.UtcNow.AddMinutes(-5);
+
+        var result = await Handler(offer).HandleAsync(new(ManualResultScope.Market, ManualResultAction.TimeVoid, "fx", "fx-1x2", null, null, "late bets after a goal", cutOff), Operator, CancellationToken.None);
+
+        result.Value.VoidFrom.ShouldBe(cutOff);
+        offer.ManualResults.ShouldHaveSingleItem();
     }
 
     [Fact]
