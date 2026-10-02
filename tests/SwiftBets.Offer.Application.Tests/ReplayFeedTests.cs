@@ -86,7 +86,7 @@ public sealed class ReplayFeedTests
         var offer = new InMemoryOffer();
         var clock = new FakeTimeProvider(Epoch);
         var options = Options.Create(new ReplayOptions { SlotSeconds = 10, ListLeadSlots = 1, Epoch = Epoch, CorrectionEvery = correctionEvery });
-        return (new FeedSync(new ReplayFeedAdapter(new OneMatchSeason(), options), offer, offer, clock), offer, clock);
+        return (new FeedSync(new ReplayFeedAdapter(new OneMatchSeason(), options), offer, offer, new InMemoryFeedHealth(), clock), offer, clock);
     }
 
     private sealed class OneMatchSeason : ISeasonSource
