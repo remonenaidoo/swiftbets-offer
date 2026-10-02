@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using SwiftBets.BuildingBlocks.Observability;
 using SwiftBets.BuildingBlocks.Web;
 using SwiftBets.Offer.Api.Endpoints;
@@ -12,6 +14,8 @@ if (HealthProbe.TryRun(args) is { } probeExitCode)
 var builder = WebApplication.CreateBuilder(args);
 builder.AddSwiftBetsObservability("swiftbets-offer");
 builder.Services.AddSwiftBetsWeb();
+// Request bodies use the contract enum names ("market", "void"), as responses do.
+builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 builder.Services.AddSwiftBetsJwtBearer(builder.Configuration);
 builder.Services.AddOfferApplication();
 builder.Services.AddOfferInfrastructure(builder.Configuration);
