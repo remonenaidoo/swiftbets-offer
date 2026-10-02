@@ -11,12 +11,16 @@ public sealed class SetMarketStatusHandlerTests
     {
         var offer = await SeededAsync();
 
-        var result = await new SetMarketStatusHandler(offer, offer, TimeProvider.System).HandleAsync("fx", "fx-1x2", suspend: true, CancellationToken.None);
+        var trader = Guid.NewGuid();
+
+        var result = await new SetMarketStatusHandler(offer, offer, TimeProvider.System).HandleAsync("fx", "fx-1x2", suspend: true, trader, CancellationToken.None);
 
         result.Value.OfferVersion.ShouldBe(2);
         result.Value.Markets.Single().Status.ShouldBe(MarketStatus.Suspended);
         offer.Published.ShouldHaveSingleItem();
-        offer.StatusChanges.ShouldHaveSingleItem().Status.ShouldBe(MarketStatus.Suspended);
+        var change = offer.StatusChanges.ShouldHaveSingleItem();
+        change.Status.ShouldBe(MarketStatus.Suspended);
+        change.OperatorId.ShouldBe(trader);
     }
 
     [Fact]
@@ -24,7 +28,7 @@ public sealed class SetMarketStatusHandlerTests
     {
         var offer = await SeededAsync();
 
-        var result = await new SetMarketStatusHandler(offer, offer, TimeProvider.System).HandleAsync("fx", "nope", suspend: true, CancellationToken.None);
+        var result = await new SetMarketStatusHandler(offer, offer, TimeProvider.System).HandleAsync("fx", "nope", suspend: true, Guid.NewGuid(), CancellationToken.None);
 
         result.Error!.Kind.ShouldBe(ErrorKind.NotFound);
     }

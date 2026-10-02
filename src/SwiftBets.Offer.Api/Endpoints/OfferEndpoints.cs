@@ -41,5 +41,8 @@ public static class OfferEndpoints
     }
 
     private static async Task<IResult> SetStatusAsync(SetMarketStatusHandler handler, string fixtureId, string marketId, bool suspend, HttpContext context, CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(fixtureId, marketId, suspend, cancellationToken)).ToHttpResult(context);
+        (await handler.HandleAsync(fixtureId, marketId, suspend, OperatorId(context), cancellationToken)).ToHttpResult(context);
+
+    private static Guid? OperatorId(HttpContext context) =>
+        Guid.TryParse(context.User.FindFirst("sub")?.Value, out var id) ? id : null;
 }
