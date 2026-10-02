@@ -11,7 +11,7 @@ public sealed class SetMarketStatusHandler(IOfferStore store, IOfferEvents event
 {
     private const int MaxAttempts = 3;
 
-    public async Task<Result<FixtureChangedV1>> HandleAsync(string fixtureId, string marketId, bool suspend, CancellationToken cancellationToken)
+    public async Task<Result<FixtureChangedV1>> HandleAsync(string fixtureId, string marketId, bool suspend, Guid? operatorId, CancellationToken cancellationToken)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
@@ -42,7 +42,7 @@ public sealed class SetMarketStatusHandler(IOfferStore store, IOfferEvents event
             if (await store.TrySaveAsync(next, current.OfferVersion, cancellationToken))
             {
                 await events.FixtureChangedAsync(next, cancellationToken);
-                await events.MarketStatusChangedAsync(new MarketStatusChangedV1(fixtureId, marketId, target, "trader", suspend ? "suspended by an operator" : "resumed by an operator", null, next.ChangedAt), cancellationToken);
+                await events.MarketStatusChangedAsync(new MarketStatusChangedV1(fixtureId, marketId, target, "trader", suspend ? "suspended by an operator" : "resumed by an operator", operatorId, next.ChangedAt), cancellationToken);
                 return Result.Success(next);
             }
         }
