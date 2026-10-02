@@ -1,4 +1,10 @@
 using System.Net;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using SwiftBets.Contracts.Trading;
+using SwiftBets.Offer.Application.Trading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using SwiftBets.BuildingBlocks.Testing;
@@ -8,8 +14,20 @@ namespace SwiftBets.Offer.Api.Tests;
 public sealed class HostTests : IClassFixture<HostTests.Factory>
 {
     private readonly HttpClient _client;
+    private readonly Factory _factory;
 
-    public HostTests(Factory factory) => _client = factory.CreateClient();
+    public HostTests(Factory factory) => (_factory, _client) = (factory, factory.CreateClient());
+
+    [Fact]
+    public void A_manual_result_request_binds_from_contract_enum_names()
+    {
+        var options = _factory.Services.GetRequiredService<IOptions<JsonOptions>>().Value.SerializerOptions;
+
+        var request = JsonSerializer.Deserialize<IssueManualResultHandler.Request>(
+            "{\"scope\":\"market\",\"action\":\"void\",\"fixtureId\":\"f\",\"marketId\":\"m\",\"reason\":\"r\"}", options)!;
+
+        (request.Scope, request.Action).ShouldBe((ManualResultScope.Market, ManualResultAction.Void));
+    }
 
     [Fact]
     public async Task Liveness_is_healthy_without_dependencies()
