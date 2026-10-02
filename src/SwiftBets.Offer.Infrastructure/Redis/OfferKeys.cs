@@ -10,6 +10,10 @@ public static class OfferKeys
 
     public static string Fixture(string fixtureId) => $"offer:fixture:{fixtureId}";
 
+    public static string ManualResult(Guid id) => $"offer:manual:{id:N}";
+
+    public static string ManualResultRejections(Guid id) => $"offer:manual:{id:N}:rejections";
+
     public static string FeedSeen(string fixtureId) => $"offer:feed-seen:{fixtureId}";
 
     public static string StaleSuspended(string fixtureId) => $"offer:stale:{fixtureId}";

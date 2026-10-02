@@ -4,7 +4,7 @@ using SwiftBets.Offer.Application.Ports;
 
 namespace SwiftBets.Offer.Application.Tests;
 
-internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
+internal sealed class InMemoryOffer : IOfferStore, IOfferEvents, IManualResultLog
 {
     private readonly Dictionary<string, FixtureChangedV1> _fixtures = [];
     private readonly HashSet<string> _results = [];
@@ -65,4 +65,10 @@ internal sealed class InMemoryOffer : IOfferStore, IOfferEvents
         StatusChanges.Add(change);
         return Task.CompletedTask;
     }
+
+    public Task RecordIssuedAsync(ManualResultV1 result, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task RecordRejectionAsync(ManualResultRejectedV1 rejection, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task<ManualResultOutcome?> GetAsync(Guid manualResultId, CancellationToken cancellationToken) => Task.FromResult<ManualResultOutcome?>(null);
 }

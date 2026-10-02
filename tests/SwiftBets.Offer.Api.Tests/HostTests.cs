@@ -30,6 +30,14 @@ public sealed class HostTests : IClassFixture<HostTests.Factory>
     }
 
     [Fact]
+    public async Task The_result_drill_does_not_exist_while_fault_injection_is_off()
+    {
+        using var response = await _client.PostAsync(new Uri("/admin/trading/drills/results", UriKind.Relative), null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task Liveness_is_healthy_without_dependencies()
     {
         using var response = await _client.GetAsync(new Uri("/health/live", UriKind.Relative), TestContext.Current.CancellationToken);

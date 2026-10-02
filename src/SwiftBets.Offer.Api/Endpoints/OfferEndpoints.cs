@@ -1,7 +1,10 @@
+using SwiftBets.BuildingBlocks.Core;
 using SwiftBets.BuildingBlocks.Web;
 using SwiftBets.Contracts.Errors;
 using SwiftBets.Contracts.Serialization;
+using SwiftBets.Offer.Application.Drills;
 using SwiftBets.Offer.Application.Markets;
+using SwiftBets.Offer.Application.Ports;
 using SwiftBets.Offer.Application.Queries;
 using SwiftBets.Offer.Application.Trading;
 
@@ -39,6 +42,20 @@ public static class OfferEndpoints
             return result.IsSuccess ? Results.Json(result.Value, ContractJson.Options, statusCode: StatusCodes.Status202Accepted) : result.ToHttpResult(context);
         })
         .RequireAuthorization(Roles.Operator);
+
+        endpoints.MapGet("/admin/trading/manual-results/{manualResultId:guid}", async (Guid manualResultId, IManualResultLog log, HttpContext context, CancellationToken cancellationToken) =>
+            await log.GetAsync(manualResultId, cancellationToken) is { } outcome
+                ? Results.Json(outcome, ContractJson.Options)
+                : Error.NotFound("manual_result_not_found", "No manual result with that id.").ToHttpResult(context))
+        .RequireAuthorization(Roles.Operator);
+
+        // Drills replay feed corrections and out-of-order results; mapped only where fault injection is on, never in production.
+        if (endpoints.ServiceProvider.GetRequiredService<ConfigurableFaultPoint>().IsEnabled)
+        {
+            endpoints.MapPost("/admin/trading/drills/results", async (PublishResultDrill.Request request, PublishResultDrill drill, HttpContext context, CancellationToken cancellationToken) =>
+                (await drill.HandleAsync(request, cancellationToken)).ToHttpResult(context, StatusCodes.Status202Accepted))
+            .RequireAuthorization(Roles.Operator);
+        }
 
         return endpoints;
     }

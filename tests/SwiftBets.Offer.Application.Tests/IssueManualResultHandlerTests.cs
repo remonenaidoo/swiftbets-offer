@@ -59,7 +59,7 @@ public sealed class IssueManualResultHandlerTests
         result.Value.Scope.ShouldBe(ManualResultScope.Fixture);
     }
 
-    private static IssueManualResultHandler Handler(InMemoryOffer offer) => new(offer, offer, TimeProvider.System);
+    private static IssueManualResultHandler Handler(InMemoryOffer offer) => new(offer, offer, offer, TimeProvider.System);
 
     private static async Task<InMemoryOffer> SeededAsync()
     {
